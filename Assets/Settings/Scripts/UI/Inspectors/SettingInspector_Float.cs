@@ -33,8 +33,9 @@ public class SettingInspector_Float : SettingInspector<Setting_Float>
 
     protected override string GetDisplayName()
     {
-        return base.GetDisplayName() + " " + 
-            (settingsVariable.GetValue() / settingsVariable.MaxValue * 100f).ToString("0") + "%";
+        float difference = settingsVariable.MaxValue - settingsVariable.MinValue;
+        float percentage = ((settingsVariable.GetValue() - settingsVariable.MinValue) / difference) * 100f;
+        return base.GetDisplayName() + " " + percentage.ToString("0") + "%";
     }
 
 }
