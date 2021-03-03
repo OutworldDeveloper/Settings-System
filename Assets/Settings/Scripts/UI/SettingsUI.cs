@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class SettingsUI : MonoBehaviour
 {
 
-    [SerializeField] private SettingsGroupInspector groupButtonPrefab;
+    [SerializeField] private SettingsGroupPresenter groupButtonPrefab;
     [SerializeField] private BaseSettingPresenter[] presentersPrefabs;
     [SerializeField] private Transform variablesParent;
 

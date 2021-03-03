@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class SettingsGroupInspector : MonoBehaviour
+public class SettingsGroupPresenter : MonoBehaviour
 {
 
     [SerializeField] private Text text = null;
