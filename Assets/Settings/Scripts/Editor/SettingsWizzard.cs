@@ -14,22 +14,17 @@ public class SettingsWizzard : EditorWindow
         GetWindow<SettingsWizzard>("Settings Wizzard");
     }
 
-    private List<SettingsGroup> groups;
+    private List<SettingsGroup> groups = new List<SettingsGroup>();
     private Editor selectedEditor;
     private ReorderableList reorderableList;
 
     private void OnEnable()
     {
-        groups = new List<SettingsGroup>();
         RefreshGroupsList();
-        reorderableList = new ReorderableList(groups, typeof(SettingsGroup));
-        reorderableList.drawHeaderCallback += DrawHeader;
-        reorderableList.onSelectCallback += OnItemSelected;
-        reorderableList.onRemoveCallback += OnItemRemoved;
-        reorderableList.onAddCallback += OnItemAdded;
 
-        maxSize = new Vector2(730f, 600f);
-        minSize = maxSize;
+        CreateReorderableList();
+
+        minSize = new Vector2(1160f, 600f);
     }
 
     private void RefreshGroupsList()
@@ -39,10 +34,30 @@ public class SettingsWizzard : EditorWindow
             groups.Add(item);
     }
 
-    private void OnItemAdded(ReorderableList list)
+    private void CreateReorderableList()
     {
-        AddNewGroup();
+        reorderableList = new ReorderableList(groups, typeof(SettingsGroup));
+
+        reorderableList.drawHeaderCallback += (Rect rect) => EditorGUI.LabelField(rect, "Groups");
+        reorderableList.onSelectCallback += OnItemSelected;
+        reorderableList.onAddCallback += (ReorderableList) => CreateGroup();
+        reorderableList.onRemoveCallback += OnItemRemoved;
     }
+
+    private void OnItemSelected(ReorderableList list)
+    {
+        selectedEditor = null;
+
+        if (groups[list.index])
+            selectedEditor = Editor.CreateEditor(groups[list.index]);
+
+        foreach (var group in groups)
+        {
+            SerializedObject so = new SerializedObject(group);
+            so.FindProperty("priority").intValue = groups.IndexOf(group);
+            so.ApplyModifiedProperties();
+        }
+    }   
 
     private void OnItemRemoved(ReorderableList list)
     {
@@ -65,51 +80,57 @@ public class SettingsWizzard : EditorWindow
         RefreshGroupsList();
     }
 
-    private void OnItemSelected(ReorderableList list)
-    {
-        selectedEditor = null;
-
-        if (groups[list.index])
-            selectedEditor = Editor.CreateEditor(groups[list.index]);
-
-        foreach (var group in groups)
-        {
-            SerializedObject so = new SerializedObject(group);
-            so.FindProperty("priority").intValue = groups.IndexOf(group);
-            so.ApplyModifiedProperties();
-        }
-    }
-
-    private void DrawHeader(Rect rect)
-    {
-        EditorGUI.LabelField(rect, "Groups");
-    }
-
     private void OnGUI()
     {
         EditorGUILayout.Space();
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.BeginVertical(GUILayout.Width(300));
-        DrawFirstColum();
-        EditorGUILayout.EndVertical();
-        EditorGUILayout.Space(10);
-        EditorGUILayout.BeginVertical(GUILayout.Width(420));
-        DrawSecondColum();
-        EditorGUILayout.EndVertical();
-        EditorGUILayout.EndHorizontal();
-    }
 
-    private void DrawSecondColum()
-    {
-        selectedEditor?.OnInspectorGUI();
+        EditorGUILayout.BeginVertical(GUILayout.Width(300));
+
+        DrawFirstColum();
+
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.Space(10);
+
+        EditorGUILayout.BeginVertical(GUILayout.Width(420));
+
+        DrawSecondColum();
+
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.Space(10);
+
+        EditorGUILayout.BeginVertical(GUILayout.Width(420));
+
+        DrawThirdColum();
+
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.EndHorizontal();
     }
 
     private void DrawFirstColum()
     {
+        EditorGUILayout.LabelField("Settings Groups", EditorStyles.boldLabel);
+        GUILayout.Space(10);
         reorderableList.DoLayoutList();
     }
 
-    private void AddNewGroup()
+    private void DrawSecondColum()
+    {
+        EditorGUILayout.LabelField("Selected Group", EditorStyles.boldLabel);
+        GUILayout.Space(10);
+        selectedEditor?.OnInspectorGUI();
+    }
+
+    private void DrawThirdColum()
+    {
+        EditorGUILayout.LabelField("Settings Group", EditorStyles.boldLabel);
+        (selectedEditor as SettingsGroupEditor)?.SelectedEditor?.OnInspectorGUI();
+    }
+
+    private void CreateGroup()
     {
         if (!AssetDatabase.IsValidFolder("Assets/Settings"))
             AssetDatabase.CreateFolder("Assets/", "Settings");

@@ -11,6 +11,8 @@ using UnityEditorInternal;
 public class SettingsGroupEditor : Editor
 {
 
+    public Editor SelectedEditor => targetEditor;
+
     private SettingsGroup targetSettingsGroup;
     private Type[] settingsTypes;
     private string[] settingsTypesNames;
@@ -84,7 +86,7 @@ public class SettingsGroupEditor : Editor
 
         EditorGUILayout.Space(10);
 
-        targetEditor?.OnInspectorGUI();
+        //targetEditor?.OnInspectorGUI();
 
         serializedObject.ApplyModifiedProperties();
     }
