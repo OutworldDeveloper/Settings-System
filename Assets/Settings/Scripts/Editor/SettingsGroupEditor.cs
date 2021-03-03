@@ -71,8 +71,10 @@ public class SettingsGroupEditor : Editor
     private void OnEnable()
     {
         if (target == null)
+        {
+            DestroyImmediate(this);
             return;
-
+        }
         settingsTypes = GetInheritedClasses(typeof(BaseSetting));
 
         settingsTypesNames = new string[settingsTypes.Length + 1];
