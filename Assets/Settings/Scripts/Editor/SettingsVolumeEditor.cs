@@ -54,11 +54,6 @@ public class SettingsVolumeEditor : Editor
 
     private void OnEnable()
     {
-        if (target == null)
-        {
-            DestroyImmediate(this);
-            return;
-        }
         targetDisplayNameProperty = serializedObject.FindProperty("displayName");
         targetMixerProperty = serializedObject.FindProperty("targetMixer");
         targetParameter = serializedObject.FindProperty("targetParameter");

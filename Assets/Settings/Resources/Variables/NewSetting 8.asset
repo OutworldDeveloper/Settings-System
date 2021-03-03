@@ -9,10 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57a6406afa1207a4aa8fd9ccb458208d, type: 3}
-  m_Name: Info
+  m_Script: {fileID: 11500000, guid: d914448848dba1947a98b01490bd301e, type: 3}
+  m_Name: NewSetting 8
   m_EditorClassIdentifier: 
-  displayName: Information
-  settings:
-  - {fileID: 11400000, guid: f9c7175f40e2f594286d3d603c59f4d5, type: 2}
-  priority: 3
+  displayName: 
+  defaultValue: 0
+  minValue: 0
+  maxValue: 0
+  targetMixer: {fileID: 0}
+  targetParameter: 

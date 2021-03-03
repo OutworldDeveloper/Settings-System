@@ -46,7 +46,7 @@ public class SettingsGroupEditor : Editor
         int selectedSettingToCreate = EditorGUILayout.Popup(0, settingsTypesNames);
         if (selectedSettingToCreate != 0)
         {
-            BaseSetting setting = CreateSetting(settingsTypes[selectedSettingToCreate - 1]);
+            BaseSetting setting = SettingsWizzard.CreateSetting(settingsTypes[selectedSettingToCreate - 1]);
             settingsArrayProperty.arraySize++;
             settingsArrayProperty.GetArrayElementAtIndex(settingsArrayProperty.arraySize - 1).objectReferenceValue = setting;
             serializedObject.ApplyModifiedProperties();
@@ -70,11 +70,6 @@ public class SettingsGroupEditor : Editor
 
     private void OnEnable()
     {
-        if (target == null)
-        {
-            DestroyImmediate(this);
-            return;
-        }
         settingsTypes = GetInheritedClasses(typeof(BaseSetting));
 
         settingsTypesNames = new string[settingsTypes.Length + 1];
@@ -88,6 +83,11 @@ public class SettingsGroupEditor : Editor
         settingsArrayProperty = serializedObject.FindProperty("settings");
 
         CreateReorderableList();
+    }
+
+    private void OnDisable()
+    {
+        DestroySelectedSettingsEditorAndClearReference();
     }
 
     private void CreateReorderableList()
@@ -113,13 +113,14 @@ public class SettingsGroupEditor : Editor
 
     private void OnItemSelected(ReorderableList list)
     {
+        DestroySelectedSettingsEditorAndClearReference();
         BaseSetting selectedSetting = TargetSettingsGroup.Settings[list.index];
         SelectedSettingEditor = CreateEditor(selectedSetting);
     }
 
     private void OnItemRemoved(ReorderableList list)
     {
-        if (!EditorUtility.DisplayDialog("Are you sure?", "Delete " + 
+        if (!EditorUtility.DisplayDialog("Are you sure?", "Delete " +
             TargetSettingsGroup.Settings[list.index].DisplayName + "?", "Delete", "Cancel"))
             return;
 
@@ -135,6 +136,13 @@ public class SettingsGroupEditor : Editor
 
         CreateReorderableList();
 
+        DestroySelectedSettingsEditorAndClearReference();
+    }
+
+    private void DestroySelectedSettingsEditorAndClearReference()
+    {
+        if (SelectedSettingEditor)
+            DestroyImmediate(SelectedSettingEditor);
         SelectedSettingEditor = null;
     }
 
@@ -142,27 +150,6 @@ public class SettingsGroupEditor : Editor
     {
         return Assembly.GetAssembly(targetType).GetTypes().
             Where(TheType => TheType.IsClass && !TheType.IsAbstract && TheType.IsSubclassOf(targetType)).ToArray();
-    }
-
-    // Could be static in the SettingsWizzaard
-    private BaseSetting CreateSetting(Type targetType)
-    {
-        BaseSetting setting = CreateInstance(targetType) as BaseSetting;
-
-        if (!AssetDatabase.IsValidFolder("Assets/Settings"))
-            AssetDatabase.CreateFolder("Assets/", "Settings");
-
-        if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources"))
-            AssetDatabase.CreateFolder("Assets/Settings", "Resources");
-
-        if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources/Variables"))
-            AssetDatabase.CreateFolder("Assets/Settings/Resources", "Variables");
-
-        string path = AssetDatabase.GenerateUniqueAssetPath("Assets/Settings/Resources/Variables/NewSetting.asset");
-
-        AssetDatabase.CreateAsset(setting, path);
-
-        return setting;
     }
 
 }
