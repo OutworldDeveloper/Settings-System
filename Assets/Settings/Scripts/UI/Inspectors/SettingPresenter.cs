@@ -5,27 +5,27 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public abstract class SettingInspector<T> : BaseSettingInspector where T : BaseSetting
+public abstract class SettingPresenter<T> : BaseSettingPresenter where T : BaseSetting
 {
 
     [SerializeField] private Text variableNameText;
 
     public override Type TargetType => typeof(T);
 
-    protected T settingsVariable;
+    protected T targetSetting;
 
-    public override void Setup(BaseSetting settingsVariable)
+    public override void Setup(BaseSetting setting)
     {
-        this.settingsVariable = settingsVariable as T;
+        targetSetting = setting as T;
         variableNameText.text = GetDisplayName();
-        Present(settingsVariable as T);
+        Present(setting as T);
     }
 
     protected abstract void Present(T settingsVariable);
 
     protected virtual string GetDisplayName()
     {
-        return settingsVariable.DisplayName;
+        return targetSetting.DisplayName;
     }
 
     protected void UpdateName()
@@ -45,7 +45,7 @@ public abstract class SettingInspector<T> : BaseSettingInspector where T : BaseS
 
     private void Settings_OnSettingsChanged()
     {
-        Present(settingsVariable);
+        Present(targetSetting);
     }
 
 }

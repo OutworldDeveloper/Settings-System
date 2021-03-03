@@ -5,14 +5,14 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
-public class SettingInspector_Bool : SettingInspector<Setting_Bool>
+public class SettingPresenter_Bool : SettingPresenter<Setting_Bool>
 {
 
     [SerializeField] private Button switchButton;
 
-    protected override void Present(Setting_Bool settingsVariable)
+    protected override void Present(Setting_Bool setting)
     {
-        switchButton.GetComponentInChildren<Text>().text = settingsVariable.GetValue() ? "enabled" : "disabled";
+        switchButton.GetComponentInChildren<Text>().text = setting.GetValue() ? "enabled" : "disabled";
     }
 
     private void OnEnable()
@@ -27,8 +27,8 @@ public class SettingInspector_Bool : SettingInspector<Setting_Bool>
 
     public void OnButtonPressed()
     {
-        settingsVariable.SetValue(!settingsVariable.GetValue());
-        switchButton.GetComponentInChildren<Text>().text = settingsVariable.GetValue() ? "enabled" : "disabled";
+        targetSetting.SetValue(!targetSetting.GetValue());
+        switchButton.GetComponentInChildren<Text>().text = targetSetting.GetValue() ? "enabled" : "disabled";
     }
 
 }

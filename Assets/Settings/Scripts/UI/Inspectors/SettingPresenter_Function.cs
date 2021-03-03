@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SettingInspector_Function : SettingInspector<Setting_Function>
+public class SettingPresenter_Function : SettingPresenter<Setting_Function>
 {
 
     [SerializeField] private Button executeButton;
     
-    protected override void Present(Setting_Function settingsVariable) 
+    protected override void Present(Setting_Function setting) 
     {
-        executeButton.GetComponentInChildren<Text>().text = settingsVariable.ButtonText;
+        executeButton.GetComponentInChildren<Text>().text = setting.ButtonText;
     }
 
     private void OnEnable()
@@ -25,7 +25,7 @@ public class SettingInspector_Function : SettingInspector<Setting_Function>
 
     public void OnButtonPressed()
     {
-        settingsVariable.Execute();
+        targetSetting.Execute();
     }
 
 }

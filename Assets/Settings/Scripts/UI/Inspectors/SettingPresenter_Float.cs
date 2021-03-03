@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SettingInspector_Float : SettingInspector<Setting_Float>
+public class SettingPresenter_Float : SettingPresenter<Setting_Float>
 {
 
     [SerializeField] private Slider slider;
 
-    protected override void Present(Setting_Float settingsVariable)
+    protected override void Present(Setting_Float settings)
     {
-        slider.minValue = settingsVariable.MinValue;
-        slider.maxValue = settingsVariable.MaxValue;
-        slider.value = settingsVariable.GetValue();
+        slider.minValue = settings.MinValue;
+        slider.maxValue = settings.MaxValue;
+        slider.value = settings.GetValue();
     }
 
     private void OnEnable()
@@ -27,14 +27,14 @@ public class SettingInspector_Float : SettingInspector<Setting_Float>
 
     public void OnValueChanged(float value)
     {
-        settingsVariable.SetValue(value);
+        targetSetting.SetValue(value);
         UpdateName();
     }
 
     protected override string GetDisplayName()
     {
-        float difference = settingsVariable.MaxValue - settingsVariable.MinValue;
-        float percentage = ((settingsVariable.GetValue() - settingsVariable.MinValue) / difference) * 100f;
+        float difference = targetSetting.MaxValue - targetSetting.MinValue;
+        float percentage = ((targetSetting.GetValue() - targetSetting.MinValue) / difference) * 100f;
         return base.GetDisplayName() + " " + percentage.ToString("0") + "%";
     }
 

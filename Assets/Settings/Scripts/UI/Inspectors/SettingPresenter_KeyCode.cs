@@ -5,7 +5,7 @@ using TMPro;
 using System;
 using UnityEngine.UI;
 
-public class SettingInspector_KeyCode : SettingInspector<Setting_KeyCode>
+public class SettingPresenter_KeyCode : SettingPresenter<Setting_KeyCode>
 {
 
     [SerializeField] private Text keyCodeText;
@@ -13,9 +13,9 @@ public class SettingInspector_KeyCode : SettingInspector<Setting_KeyCode>
 
     private bool isListening;
 
-    protected override void Present(Setting_KeyCode settingsVariable)
+    protected override void Present(Setting_KeyCode setting)
     {
-        keyCodeText.text = settingsVariable.GetValue().ToString();
+        keyCodeText.text = setting.GetValue().ToString();
     }
 
     private void OnEnable()
@@ -45,7 +45,7 @@ public class SettingInspector_KeyCode : SettingInspector<Setting_KeyCode>
             {
                 if (Input.GetKey(item))
                 {
-                    settingsVariable.SetValue(item);
+                    targetSetting.SetValue(item);
                     EndListeningForInput();
                     isListening = false;
                     return;
@@ -62,7 +62,7 @@ public class SettingInspector_KeyCode : SettingInspector<Setting_KeyCode>
 
     private void EndListeningForInput()
     {
-        keyCodeText.text = settingsVariable.GetValue().ToString();
+        keyCodeText.text = targetSetting.GetValue().ToString();
         isListening = false;
     }
 

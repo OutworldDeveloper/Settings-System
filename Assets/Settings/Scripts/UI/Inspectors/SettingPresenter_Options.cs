@@ -3,26 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SettingInspector_Options : SettingInspector<Setting_Options>
+public class SettingPresenter_Options : SettingPresenter<Setting_Options>
 {
 
     [SerializeField] private Dropdown dropdown;
 
-    protected override void Present(Setting_Options settingsVariable)
+    protected override void Present(Setting_Options setting)
     {
         dropdown.ClearOptions();
-        foreach (var item in settingsVariable.Options.options)
+        foreach (var item in setting.Options.options)
         {
-            Dropdown.OptionData _optionData = new Dropdown.OptionData();
-            _optionData.text = item.displayName;
-            dropdown.options.Add(_optionData);
+            Dropdown.OptionData optionData = new Dropdown.OptionData();
+            optionData.text = item.displayName;
+            dropdown.options.Add(optionData);
         }
-        dropdown.value = settingsVariable.GetValue();
+        dropdown.value = setting.GetValue();
     }
 
     private void OnValueChanged(int value)
     {
-        settingsVariable.SetValue(value);
+        targetSetting.SetValue(value);
     }
 
     private void OnEnable()

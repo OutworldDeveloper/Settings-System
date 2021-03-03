@@ -8,7 +8,7 @@ public class SettingsUI : MonoBehaviour
 {
 
     [SerializeField] private SettingsGroupInspector groupButtonPrefab;
-    [SerializeField] private BaseSettingInspector[] presentersPrefabs;
+    [SerializeField] private BaseSettingPresenter[] presentersPrefabs;
     [SerializeField] private Transform variablesParent;
 
     private void Start()
