@@ -15,4 +15,4 @@ MonoBehaviour:
   displayName: Information
   settings:
   - {fileID: 11400000, guid: f9c7175f40e2f594286d3d603c59f4d5, type: 2}
-  priority: 3
+  priority: 4
