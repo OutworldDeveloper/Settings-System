@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d914448848dba1947a98b01490bd301e, type: 3}
-  m_Name: volume_music
+  m_Name: Master Volume
   m_EditorClassIdentifier: 
-  displayName: Music Volume
+  displayName: Master Volume
   defaultValue: 0
   minValue: 0
   maxValue: 0
   targetMixer: {fileID: 24100000, guid: 5f89105d226805f489bb881be08844f3, type: 2}
-  targetParameter: MusicVolume
+  targetParameter: MasterVolume

@@ -56,13 +56,18 @@ public class SettingsWizzard : EditorWindow
 
     private List<SettingsGroup> groups = new List<SettingsGroup>();
     private ReorderableList groupsReorderableList;
-    private SettingsGroupEditor settingsGroupEditor;
+
+    private SettingsGroupEditor selectedGroupEditor;
+    private SettingsGroup selectedGroup;
+
+    private Editor selectedSettingEditor;
+    private BaseSetting selectedSetting;
 
     private void OnEnable()
     {
         RefreshGroupsList();
         CreateReorderableList();
-        minSize = new Vector2(1160f, 600f);
+        minSize = new Vector2(1200f, 600f);
     }
 
     private void OnDisable()
@@ -72,9 +77,18 @@ public class SettingsWizzard : EditorWindow
 
     private void DestoryGroupEditorAndClearReference()
     {
-        if (settingsGroupEditor)
-            DestroyImmediate(settingsGroupEditor);
-        settingsGroupEditor = null;
+        selectedGroup = null;
+        if (selectedGroupEditor)
+        {
+            selectedGroupEditor.SettingSelected -= SettingsGroupEditor_SettingSelected;
+            DestroyImmediate(selectedGroupEditor);
+        }
+        selectedGroupEditor = null;
+
+        selectedSetting = null;
+        if (selectedSettingEditor)
+            DestroyImmediate(selectedSettingEditor);
+        selectedSettingEditor = null;
     }
 
     private void RefreshGroupsList()
@@ -96,7 +110,11 @@ public class SettingsWizzard : EditorWindow
     private void OnItemSelected(ReorderableList list)
     {
         DestoryGroupEditorAndClearReference();
-        settingsGroupEditor = Editor.CreateEditor(groups[list.index]) as SettingsGroupEditor;
+
+        selectedGroup = groups[list.index];
+
+        selectedGroupEditor = Editor.CreateEditor(groups[list.index]) as SettingsGroupEditor;
+        selectedGroupEditor.SettingSelected += SettingsGroupEditor_SettingSelected;
 
         foreach (var group in groups)
         {
@@ -104,7 +122,13 @@ public class SettingsWizzard : EditorWindow
             so.FindProperty("priority").intValue = groups.IndexOf(group);
             so.ApplyModifiedProperties();
         }
-    }   
+    }
+
+    private void SettingsGroupEditor_SettingSelected(BaseSetting selectedSetting)
+    {
+        this.selectedSetting = selectedSetting;
+        selectedSettingEditor = Editor.CreateEditor(selectedSetting);
+    }
 
     private void OnItemRemoved(ReorderableList list)
     {
@@ -160,26 +184,50 @@ public class SettingsWizzard : EditorWindow
     private void DrawFirstColumn()
     {
         EditorGUILayout.LabelField("Groups", EditorStyles.boldLabel);
-        GUILayout.Space(10);
+        GUILayout.Space(15);
 
         groupsReorderableList.DoLayoutList();
     }
 
     private void DrawSecondColumn()
     {
-        EditorGUILayout.LabelField(settingsGroupEditor ? settingsGroupEditor.TargetSettingsGroup.DisplayName : 
+        EditorGUILayout.LabelField(selectedGroupEditor ? selectedGroupEditor.TargetSettingsGroup.DisplayName : 
             "No group selected", EditorStyles.boldLabel);
-        GUILayout.Space(10);
+        GUILayout.Space(15);
 
-        settingsGroupEditor?.OnInspectorGUI();
+        if (selectedGroup)
+        {
+            GUILayout.Label("Filename: ");
+
+            string oldName = selectedGroup.name;
+            string path = AssetDatabase.GetAssetPath(selectedGroup);
+            string newName = EditorGUILayout.DelayedTextField(oldName);
+
+            if (oldName != newName)
+                AssetDatabase.RenameAsset(path, newName);
+        }
+
+        selectedGroupEditor?.OnInspectorGUI();
     }
 
     private void DrawThirdColumn()
     {
         EditorGUILayout.LabelField("Setting", EditorStyles.boldLabel);
-        GUILayout.Space(10);
+        GUILayout.Space(15);
 
-        settingsGroupEditor?.SelectedSettingEditor?.OnInspectorGUI();
+        if (selectedSetting)
+        {
+            GUILayout.Label("Filename:");
+
+            string oldName = selectedSetting.name;
+            string path = AssetDatabase.GetAssetPath(selectedSetting);
+            string newName = EditorGUILayout.DelayedTextField(oldName);
+
+            if (oldName != newName)
+                AssetDatabase.RenameAsset(path, newName);
+        }
+
+        selectedSettingEditor?.OnInspectorGUI();
     }
 
 }

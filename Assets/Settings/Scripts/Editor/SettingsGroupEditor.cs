@@ -11,8 +11,9 @@ using UnityEditorInternal;
 public class SettingsGroupEditor : Editor
 {
 
+    public event Action<BaseSetting> SettingSelected;
+
     public SettingsGroup TargetSettingsGroup { get; private set; }
-    public Editor SelectedSettingEditor { get; private set; }
 
     private Type[] settingsTypes;
     private string[] settingsTypesNames;
@@ -25,14 +26,6 @@ public class SettingsGroupEditor : Editor
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
-
-        /*
-        GUILayout.Label("Filename: ");
-        string oldFilename = target.name;
-        string newFilename = EditorGUILayout.DelayedTextField(oldFilename);
-        if (oldFilename != newFilename)
-            AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), newFilename);
-        */
 
         EditorGUI.BeginChangeCheck();
 
@@ -51,21 +44,6 @@ public class SettingsGroupEditor : Editor
             settingsArrayProperty.GetArrayElementAtIndex(settingsArrayProperty.arraySize - 1).objectReferenceValue = setting;
             serializedObject.ApplyModifiedProperties();
         }
-
-        /*
-        if (selection != -1 && settingsProperty.GetArrayElementAtIndex(selection).objectReferenceValue != null)
-        {
-            GUILayout.Label("Filename:");
-
-            string name = settingsProperty.GetArrayElementAtIndex(selection).objectReferenceValue.name;
-            string path = AssetDatabase.GetAssetPath(settingsProperty.GetArrayElementAtIndex(selection).objectReferenceValue);
-
-            string newName = EditorGUILayout.DelayedTextField(name);
-
-            if (newName != name)
-                AssetDatabase.RenameAsset(path, newName);
-        }
-        */
     }
 
     private void OnEnable()
@@ -83,11 +61,6 @@ public class SettingsGroupEditor : Editor
         settingsArrayProperty = serializedObject.FindProperty("settings");
 
         CreateReorderableList();
-    }
-
-    private void OnDisable()
-    {
-        DestroySelectedSettingsEditorAndClearReference();
     }
 
     private void CreateReorderableList()
@@ -113,9 +86,8 @@ public class SettingsGroupEditor : Editor
 
     private void OnItemSelected(ReorderableList list)
     {
-        DestroySelectedSettingsEditorAndClearReference();
-        BaseSetting selectedSetting = TargetSettingsGroup.Settings[list.index];
-        SelectedSettingEditor = CreateEditor(selectedSetting);
+        BaseSetting selectedSetting = TargetSettingsGroup.Settings[list.index];   
+        SettingSelected?.Invoke(selectedSetting);
     }
 
     private void OnItemRemoved(ReorderableList list)
@@ -136,14 +108,7 @@ public class SettingsGroupEditor : Editor
 
         CreateReorderableList();
 
-        DestroySelectedSettingsEditorAndClearReference();
-    }
-
-    private void DestroySelectedSettingsEditorAndClearReference()
-    {
-        if (SelectedSettingEditor)
-            DestroyImmediate(SelectedSettingEditor);
-        SelectedSettingEditor = null;
+        SettingSelected?.Invoke(null);
     }
 
     private Type[] GetInheritedClasses(Type targetType)
