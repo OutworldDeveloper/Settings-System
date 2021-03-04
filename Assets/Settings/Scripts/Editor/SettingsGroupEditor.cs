@@ -60,10 +60,10 @@ public class SettingsGroupEditor : Editor
         displayNameProperty = serializedObject.FindProperty("displayName");
         settingsArrayProperty = serializedObject.FindProperty("settings");
 
-        CreateReorderableList();
+        CreateReorderableList(settingsArrayProperty);
     }
 
-    private void CreateReorderableList()
+    private void CreateReorderableList(SerializedProperty settingsArrayProperty)
     {
         settingsReorderableList = new ReorderableList(serializedObject, settingsArrayProperty, true, false, false, true);
         settingsReorderableList.drawHeaderCallback += DrawHeader;
@@ -98,7 +98,8 @@ public class SettingsGroupEditor : Editor
 
         UnityEngine.Object targetObject = settingsArrayProperty.GetArrayElementAtIndex(list.index).objectReferenceValue;
 
-        settingsArrayProperty.arraySize--;
+        settingsArrayProperty.DeleteArrayElementAtIndex(list.index);
+        settingsArrayProperty.DeleteArrayElementAtIndex(list.index);
         serializedObject.ApplyModifiedProperties();
 
         string path = AssetDatabase.GetAssetPath(targetObject);
@@ -106,7 +107,7 @@ public class SettingsGroupEditor : Editor
 
         AssetDatabase.Refresh();
 
-        CreateReorderableList();
+        CreateReorderableList(settingsArrayProperty);
 
         SettingSelected?.Invoke(null);
     }
