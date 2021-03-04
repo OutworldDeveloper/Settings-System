@@ -126,8 +126,13 @@ public class SettingsWizzard : EditorWindow
 
     private void SettingsGroupEditor_SettingSelected(BaseSetting selectedSetting)
     {
+        if (selectedSettingEditor)
+            DestroyImmediate(selectedSettingEditor);
+        selectedSettingEditor = null;
+
         this.selectedSetting = selectedSetting;
-        selectedSettingEditor = Editor.CreateEditor(selectedSetting);
+        if (selectedSetting)
+            selectedSettingEditor = Editor.CreateEditor(selectedSetting);
     }
 
     private void OnItemRemoved(ReorderableList list)
@@ -184,16 +189,15 @@ public class SettingsWizzard : EditorWindow
     private void DrawFirstColumn()
     {
         EditorGUILayout.LabelField("Groups", EditorStyles.boldLabel);
-        GUILayout.Space(15);
+        GUILayout.Space(10);
 
         groupsReorderableList.DoLayoutList();
     }
 
     private void DrawSecondColumn()
     {
-        EditorGUILayout.LabelField(selectedGroupEditor ? selectedGroupEditor.TargetSettingsGroup.DisplayName : 
-            "No group selected", EditorStyles.boldLabel);
-        GUILayout.Space(15);
+        EditorGUILayout.LabelField(selectedGroup ? selectedGroup.DisplayName : "No group selected", EditorStyles.boldLabel);
+        GUILayout.Space(10);
 
         if (selectedGroup)
         {
@@ -212,8 +216,8 @@ public class SettingsWizzard : EditorWindow
 
     private void DrawThirdColumn()
     {
-        EditorGUILayout.LabelField("Setting", EditorStyles.boldLabel);
-        GUILayout.Space(15);
+        EditorGUILayout.LabelField(selectedSetting ? selectedSetting.DisplayName : "No setting selected", EditorStyles.boldLabel);
+        GUILayout.Space(10);
 
         if (selectedSetting)
         {

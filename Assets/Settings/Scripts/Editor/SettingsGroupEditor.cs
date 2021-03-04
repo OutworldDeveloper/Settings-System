@@ -13,7 +13,7 @@ public class SettingsGroupEditor : Editor
 
     public event Action<BaseSetting> SettingSelected;
 
-    public SettingsGroup TargetSettingsGroup { get; private set; }
+    private SettingsGroup targetSettingsGroup;
 
     private Type[] settingsTypes;
     private string[] settingsTypesNames;
@@ -55,7 +55,7 @@ public class SettingsGroupEditor : Editor
         for (int i = 0; i < settingsTypes.Length; i++)
             settingsTypesNames[i + 1] = settingsTypes[i].ToString();
 
-        TargetSettingsGroup = target as SettingsGroup;
+        targetSettingsGroup = target as SettingsGroup;
 
         displayNameProperty = serializedObject.FindProperty("displayName");
         settingsArrayProperty = serializedObject.FindProperty("settings");
@@ -79,21 +79,21 @@ public class SettingsGroupEditor : Editor
 
     private void DrawListItems(Rect rect, int index, bool isActive, bool isFocused)
     {
-        string text = TargetSettingsGroup.Settings[index].DisplayName + " (" + 
-            TargetSettingsGroup.Settings[index].GetType() + ")";
+        string text = targetSettingsGroup.Settings[index].DisplayName + " (" + 
+            targetSettingsGroup.Settings[index].GetType() + ")";
         EditorGUI.LabelField(new Rect(rect.x, rect.y, 300, EditorGUIUtility.singleLineHeight), text);
     }
 
     private void OnItemSelected(ReorderableList list)
     {
-        BaseSetting selectedSetting = TargetSettingsGroup.Settings[list.index];   
+        BaseSetting selectedSetting = targetSettingsGroup.Settings[list.index];   
         SettingSelected?.Invoke(selectedSetting);
     }
 
     private void OnItemRemoved(ReorderableList list)
     {
         if (!EditorUtility.DisplayDialog("Are you sure?", "Delete " +
-            TargetSettingsGroup.Settings[list.index].DisplayName + "?", "Delete", "Cancel"))
+            targetSettingsGroup.Settings[list.index].DisplayName + "?", "Delete", "Cancel"))
             return;
 
         UnityEngine.Object targetObject = settingsArrayProperty.GetArrayElementAtIndex(list.index).objectReferenceValue;
