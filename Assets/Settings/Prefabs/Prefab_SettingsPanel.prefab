@@ -799,7 +799,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 376847fd67db43043b757119fd94f836, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  groupButtonPrefab: {fileID: 2295995378950334817, guid: 790947ff89954b644a62a2a3aedb540d,
+  settingGroupPresenterPrefab: {fileID: 2295995378950334817, guid: 790947ff89954b644a62a2a3aedb540d,
     type: 3}
   presentersPrefabs:
   - {fileID: 1882416459333590584, guid: c683df4a628f9f3409baab5720f22cf7, type: 3}
@@ -809,4 +809,4 @@ MonoBehaviour:
   - {fileID: 8275343523017148022, guid: 93bc52da4fc2e0c45a57c33f012bcead, type: 3}
   - {fileID: 1429017152499499341, guid: 1fcbc70d4f485964aa4689b33ece6b16, type: 3}
   - {fileID: 9216224285914468313, guid: 51cbf8136beed934299539093a31d513, type: 3}
-  variablesParent: {fileID: 2496909387093063492}
+  presentersParent: {fileID: 2496909387093063492}

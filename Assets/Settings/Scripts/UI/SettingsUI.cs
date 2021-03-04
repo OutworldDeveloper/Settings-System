@@ -7,9 +7,9 @@ using UnityEngine.UI;
 public class SettingsUI : MonoBehaviour
 {
 
-    [SerializeField] private SettingsGroupPresenter groupButtonPrefab;
+    [SerializeField] private SettingsGroupPresenter settingGroupPresenterPrefab;
     [SerializeField] private BaseSettingPresenter[] presentersPrefabs;
-    [SerializeField] private Transform variablesParent;
+    [SerializeField] private Transform presentersParent;
 
     private void Start()
     {
@@ -20,7 +20,7 @@ public class SettingsUI : MonoBehaviour
     {
         foreach (var group in Settings.GetGroups())
         {
-            Instantiate(groupButtonPrefab, variablesParent).Setup(group);
+            Instantiate(settingGroupPresenterPrefab, presentersParent).Setup(group);
             foreach (var parameter in group.Settings)
             {
                 bool found = false;
@@ -28,7 +28,7 @@ public class SettingsUI : MonoBehaviour
                 {
                     if (presenterPrefab.TargetType != parameter.GetType()) 
                         continue;
-                    Instantiate(presenterPrefab, variablesParent).Setup(parameter);
+                    Instantiate(presenterPrefab, presentersParent).Setup(parameter);
                     found = true;
                     break;
                 }
@@ -38,7 +38,7 @@ public class SettingsUI : MonoBehaviour
                 {
                     if(!parameter.GetType().IsSubclassOf(presenterPrefab.TargetType)) 
                         continue;
-                    Instantiate(presenterPrefab, variablesParent).Setup(parameter);
+                    Instantiate(presenterPrefab, presentersParent).Setup(parameter);
                     break;
                 }
             }      

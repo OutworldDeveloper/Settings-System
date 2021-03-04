@@ -8,28 +8,87 @@ using System;
 public class SettingsWizzard : EditorWindow
 {
 
+    public static BaseSetting CreateSetting(Type targetType)
+    {
+        BaseSetting setting = CreateInstance(targetType) as BaseSetting;
+
+        if (!AssetDatabase.IsValidFolder("Assets/Settings"))
+            AssetDatabase.CreateFolder("Assets/", "Settings");
+
+        if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources"))
+            AssetDatabase.CreateFolder("Assets/Settings", "Resources");
+
+        if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources/Variables"))
+            AssetDatabase.CreateFolder("Assets/Settings/Resources", "Variables");
+
+        string path = AssetDatabase.GenerateUniqueAssetPath("Assets/Settings/Resources/Variables/NewSetting.asset");
+
+        AssetDatabase.CreateAsset(setting, path);
+
+        return setting;
+    }
+
+    public static SettingsGroup CreateGroup()
+    {
+        SettingsGroup settingsGroup = CreateInstance<SettingsGroup>();
+
+        if (!AssetDatabase.IsValidFolder("Assets/Settings"))
+            AssetDatabase.CreateFolder("Assets/", "Settings");
+
+        if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources"))
+            AssetDatabase.CreateFolder("Assets/Settings", "Resources");
+
+        if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources/Groups"))
+            AssetDatabase.CreateFolder("Assets/Settings/Resources", "Groups");
+
+        string path = AssetDatabase.GenerateUniqueAssetPath("Assets/Settings/Resources/Groups/NewSettingsGroup.asset");
+
+        AssetDatabase.CreateAsset(settingsGroup, path);
+
+        return settingsGroup;
+    }
+
     [MenuItem("Window/Settings Wizzard")]
     public static void ShowSettingsWizzard()
     {
         GetWindow<SettingsWizzard>("Settings Wizzard");
     }
 
-    private List<SettingsGroup> groups;
-    private Editor selectedEditor;
-    private ReorderableList reorderableList;
+    private List<SettingsGroup> groups = new List<SettingsGroup>();
+    private ReorderableList groupsReorderableList;
+
+    private SettingsGroupEditor selectedGroupEditor;
+    private SettingsGroup selectedGroup;
+
+    private Editor selectedSettingEditor;
+    private BaseSetting selectedSetting;
 
     private void OnEnable()
     {
-        groups = new List<SettingsGroup>();
         RefreshGroupsList();
-        reorderableList = new ReorderableList(groups, typeof(SettingsGroup));
-        reorderableList.drawHeaderCallback += DrawHeader;
-        reorderableList.onSelectCallback += OnItemSelected;
-        reorderableList.onRemoveCallback += OnItemRemoved;
-        reorderableList.onAddCallback += OnItemAdded;
+        CreateReorderableList();
+        minSize = new Vector2(1200f, 600f);
+    }
 
-        maxSize = new Vector2(730f, 600f);
-        minSize = maxSize;
+    private void OnDisable()
+    {
+        DestoryGroupEditorAndClearReference();
+    }
+
+    private void DestoryGroupEditorAndClearReference()
+    {
+        selectedGroup = null;
+        if (selectedGroupEditor)
+        {
+            selectedGroupEditor.SettingSelected -= SettingsGroupEditor_SettingSelected;
+            DestroyImmediate(selectedGroupEditor);
+        }
+        selectedGroupEditor = null;
+
+        selectedSetting = null;
+        if (selectedSettingEditor)
+            DestroyImmediate(selectedSettingEditor);
+        selectedSettingEditor = null;
     }
 
     private void RefreshGroupsList()
@@ -39,9 +98,41 @@ public class SettingsWizzard : EditorWindow
             groups.Add(item);
     }
 
-    private void OnItemAdded(ReorderableList list)
+    private void CreateReorderableList()
     {
-        AddNewGroup();
+        groupsReorderableList = new ReorderableList(groups, typeof(SettingsGroup));
+        groupsReorderableList.drawHeaderCallback += (Rect rect) => EditorGUI.LabelField(rect, "Groups");
+        groupsReorderableList.onSelectCallback += OnItemSelected;
+        groupsReorderableList.onAddCallback += (ReorderableList) => { CreateGroup(); RefreshGroupsList(); };
+        groupsReorderableList.onRemoveCallback += OnItemRemoved;
+    }
+
+    private void OnItemSelected(ReorderableList list)
+    {
+        DestoryGroupEditorAndClearReference();
+
+        selectedGroup = groups[list.index];
+
+        selectedGroupEditor = Editor.CreateEditor(groups[list.index]) as SettingsGroupEditor;
+        selectedGroupEditor.SettingSelected += SettingsGroupEditor_SettingSelected;
+
+        foreach (var group in groups)
+        {
+            SerializedObject so = new SerializedObject(group);
+            so.FindProperty("priority").intValue = groups.IndexOf(group);
+            so.ApplyModifiedProperties();
+        }
+    }
+
+    private void SettingsGroupEditor_SettingSelected(BaseSetting selectedSetting)
+    {
+        if (selectedSettingEditor)
+            DestroyImmediate(selectedSettingEditor);
+        selectedSettingEditor = null;
+
+        this.selectedSetting = selectedSetting;
+        if (selectedSetting)
+            selectedSettingEditor = Editor.CreateEditor(selectedSetting);
     }
 
     private void OnItemRemoved(ReorderableList list)
@@ -60,71 +151,87 @@ public class SettingsWizzard : EditorWindow
         AssetDatabase.DeleteAsset(path);
         AssetDatabase.Refresh();
 
-        selectedEditor = null;
-
         RefreshGroupsList();
-    }
 
-    private void OnItemSelected(ReorderableList list)
-    {
-        selectedEditor = null;
-
-        if (groups[list.index])
-            selectedEditor = Editor.CreateEditor(groups[list.index]);
-
-        foreach (var group in groups)
-        {
-            SerializedObject so = new SerializedObject(group);
-            so.FindProperty("priority").intValue = groups.IndexOf(group);
-            so.ApplyModifiedProperties();
-        }
-    }
-
-    private void DrawHeader(Rect rect)
-    {
-        EditorGUI.LabelField(rect, "Groups");
+        DestoryGroupEditorAndClearReference();
     }
 
     private void OnGUI()
     {
         EditorGUILayout.Space();
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.BeginVertical(GUILayout.Width(300));
-        DrawFirstColum();
+
+        EditorGUILayout.BeginVertical(GUILayout.MinWidth(300));
+
+        DrawFirstColumn();
+
         EditorGUILayout.EndVertical();
+
         EditorGUILayout.Space(10);
+
         EditorGUILayout.BeginVertical(GUILayout.Width(420));
-        DrawSecondColum();
+
+        DrawSecondColumn();
+
         EditorGUILayout.EndVertical();
+
+        EditorGUILayout.Space(10);
+
+        EditorGUILayout.BeginVertical(GUILayout.Width(420));
+
+        DrawThirdColumn();
+
+        EditorGUILayout.EndVertical();
+
         EditorGUILayout.EndHorizontal();
     }
 
-    private void DrawSecondColum()
+    private void DrawFirstColumn()
     {
-        selectedEditor?.OnInspectorGUI();
+        EditorGUILayout.LabelField("Groups", EditorStyles.boldLabel);
+        GUILayout.Space(10);
+
+        groupsReorderableList.DoLayoutList();
     }
 
-    private void DrawFirstColum()
+    private void DrawSecondColumn()
     {
-        reorderableList.DoLayoutList();
+        EditorGUILayout.LabelField(selectedGroup ? selectedGroup.DisplayName : "No group selected", EditorStyles.boldLabel);
+        GUILayout.Space(10);
+
+        if (selectedGroup)
+        {
+            GUILayout.Label("Filename: ");
+
+            string oldName = selectedGroup.name;
+            string path = AssetDatabase.GetAssetPath(selectedGroup);
+            string newName = EditorGUILayout.DelayedTextField(oldName);
+
+            if (oldName != newName)
+                AssetDatabase.RenameAsset(path, newName);
+        }
+
+        selectedGroupEditor?.OnInspectorGUI();
     }
 
-    private void AddNewGroup()
+    private void DrawThirdColumn()
     {
-        if (!AssetDatabase.IsValidFolder("Assets/Settings"))
-            AssetDatabase.CreateFolder("Assets/", "Settings");
+        EditorGUILayout.LabelField(selectedSetting ? selectedSetting.DisplayName : "No setting selected", EditorStyles.boldLabel);
+        GUILayout.Space(10);
 
-        if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources"))
-            AssetDatabase.CreateFolder("Assets/Settings", "Resources");
+        if (selectedSetting)
+        {
+            GUILayout.Label("Filename:");
 
-        if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources/Groups"))
-            AssetDatabase.CreateFolder("Assets/Settings/Resources", "Groups");
+            string oldName = selectedSetting.name;
+            string path = AssetDatabase.GetAssetPath(selectedSetting);
+            string newName = EditorGUILayout.DelayedTextField(oldName);
 
-        string path = AssetDatabase.GenerateUniqueAssetPath("Assets/Settings/Resources/Groups/NewSettingsGroup.asset");
+            if (oldName != newName)
+                AssetDatabase.RenameAsset(path, newName);
+        }
 
-        AssetDatabase.CreateAsset(CreateInstance<SettingsGroup>(), path);
-
-        RefreshGroupsList();
+        selectedSettingEditor?.OnInspectorGUI();
     }
 
 }

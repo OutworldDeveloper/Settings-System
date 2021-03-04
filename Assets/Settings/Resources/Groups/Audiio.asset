@@ -9,12 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d914448848dba1947a98b01490bd301e, type: 3}
-  m_Name: volume_music
+  m_Script: {fileID: 11500000, guid: 57a6406afa1207a4aa8fd9ccb458208d, type: 3}
+  m_Name: Audiio
   m_EditorClassIdentifier: 
-  displayName: Music Volume
-  defaultValue: 0
-  minValue: 0
-  maxValue: 0
-  targetMixer: {fileID: 24100000, guid: 5f89105d226805f489bb881be08844f3, type: 2}
-  targetParameter: MusicVolume
+  displayName: Audio
+  settings:
+  - {fileID: 11400000, guid: 667e4bfdfa6ad6f488920ed67a701855, type: 2}
+  - {fileID: 11400000, guid: 1f8613f6210a8954c9f580fc4f1f7201, type: 2}
+  priority: 0

@@ -11,136 +11,39 @@ using UnityEditorInternal;
 public class SettingsGroupEditor : Editor
 {
 
+    public event Action<BaseSetting> SettingSelected;
+
     private SettingsGroup targetSettingsGroup;
+
     private Type[] settingsTypes;
     private string[] settingsTypesNames;
+
     private SerializedProperty displayNameProperty;
-    private SerializedProperty settingsProperty;
-    private ReorderableList reorderableList;
-    private int selection = -1;
-    private Editor targetEditor;
+    private SerializedProperty settingsArrayProperty;
+    
+    private ReorderableList settingsReorderableList;
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
 
-        GUILayout.Label("Filename: ");
-        string oldFilename = target.name;
-        string newFilename = EditorGUILayout.DelayedTextField(oldFilename);
-        if (oldFilename != newFilename)
-            AssetDatabase.RenameAsset(AssetDatabase.GetAssetPath(target), newFilename);
-
-        //EditorGUILayout.PropertyField(serializedObject.FindProperty("m_Name"));
+        EditorGUI.BeginChangeCheck();
 
         EditorGUILayout.PropertyField(displayNameProperty);
 
-        DrawHorizontalBorder();
-
-        int i = EditorGUILayout.Popup(0, settingsTypesNames);
-
-        if (i != 0)
-        {
-            BaseSetting setting = CreateInstance(settingsTypes[i - 1]) as BaseSetting;
-
-            if (!AssetDatabase.IsValidFolder("Assets/Settings"))
-                AssetDatabase.CreateFolder("Assets/", "Settings");
-
-            if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources"))
-                AssetDatabase.CreateFolder("Assets/Settings", "Resources");
-
-            if (!AssetDatabase.IsValidFolder("Assets/Settings/Resources/Variables"))
-                AssetDatabase.CreateFolder("Assets/Settings/Resources", "Variables");
-
-            string path = AssetDatabase.GenerateUniqueAssetPath("Assets/Settings/Resources/Variables/NewSetting.asset");
-
-            AssetDatabase.CreateAsset(setting, path);
-
-            settingsProperty.arraySize++;
-            settingsProperty.GetArrayElementAtIndex(settingsProperty.arraySize - 1).objectReferenceValue =
-                AssetDatabase.LoadAssetAtPath(path, typeof(BaseSetting));
-
-            RefreshEditors();
-
+        if (EditorGUI.EndChangeCheck())
             serializedObject.ApplyModifiedProperties();
-            return;
-        }
 
-        reorderableList.DoLayoutList();
+        settingsReorderableList.DoLayoutList();
 
-        DrawHorizontalBorder();
-
-        if (selection != -1 && settingsProperty.GetArrayElementAtIndex(selection).objectReferenceValue != null)
+        int selectedSettingToCreate = EditorGUILayout.Popup(0, settingsTypesNames);
+        if (selectedSettingToCreate != 0)
         {
-            GUILayout.Label("Filename:");
-
-            string name = settingsProperty.GetArrayElementAtIndex(selection).objectReferenceValue.name;
-            string path = AssetDatabase.GetAssetPath(settingsProperty.GetArrayElementAtIndex(selection).objectReferenceValue);
-
-            string newName = EditorGUILayout.DelayedTextField(name);
-
-            if (newName != name)
-                AssetDatabase.RenameAsset(path, newName);
+            BaseSetting setting = SettingsWizzard.CreateSetting(settingsTypes[selectedSettingToCreate - 1]);
+            settingsArrayProperty.arraySize++;
+            settingsArrayProperty.GetArrayElementAtIndex(settingsArrayProperty.arraySize - 1).objectReferenceValue = setting;
+            serializedObject.ApplyModifiedProperties();
         }
-
-        EditorGUILayout.Space(10);
-
-        targetEditor?.OnInspectorGUI();
-
-        serializedObject.ApplyModifiedProperties();
-    }
-
-    private static void DrawHorizontalBorder()
-    {
-        EditorGUILayout.TextArea("", GUI.skin.horizontalSlider);
-
-        EditorGUILayout.Space(15);
-    }
-
-    private void DrawListItems(Rect rect, int index, bool isActive, bool isFocused)
-    {
-        if (!targetSettingsGroup.Settings[index])
-        {
-            settingsProperty.DeleteArrayElementAtIndex(index);
-            return;
-        }
-        EditorGUI.LabelField(new Rect(rect.x, rect.y, 300, EditorGUIUtility.singleLineHeight),
-            (targetSettingsGroup.Settings[index].DisplayName + " (" +
-            targetSettingsGroup.Settings[index].GetType() + ")"));
-    }
-
-    private void DrawHeader(Rect rect)
-    {
-        EditorGUI.LabelField(rect, displayNameProperty.stringValue);
-    }
-
-    private void OnItemSelected(ReorderableList list)
-    {
-        selection = list.index;
-        RefreshEditors();
-    }
-
-    private void OnItemRemoved(ReorderableList list)
-    {
-        if (!EditorUtility.DisplayDialog("Are you sure?", "Delete " + 
-            targetSettingsGroup.Settings[list.index].DisplayName + "?", "Delete", "Cancel"))
-            return;
-
-        string path = AssetDatabase.GetAssetPath(settingsProperty.GetArrayElementAtIndex(list.index).objectReferenceValue);
-
-        settingsProperty.DeleteArrayElementAtIndex(list.index);
-
-        AssetDatabase.DeleteAsset(path);
-        AssetDatabase.Refresh();
-
-        selection = -1;
-
-        RefreshEditors();
-    }
-
-    private Type[] GetInheritedClasses(Type MyType)
-    {
-        return Assembly.GetAssembly(MyType).GetTypes().
-            Where(TheType => TheType.IsClass && !TheType.IsAbstract && TheType.IsSubclassOf(MyType)).ToArray();
     }
 
     private void OnEnable()
@@ -154,27 +57,64 @@ public class SettingsGroupEditor : Editor
 
         targetSettingsGroup = target as SettingsGroup;
 
-        settingsProperty = serializedObject.FindProperty("settings");
         displayNameProperty = serializedObject.FindProperty("displayName");
+        settingsArrayProperty = serializedObject.FindProperty("settings");
 
-        reorderableList = new ReorderableList(serializedObject, settingsProperty, true, false, false, true);
-        reorderableList.drawElementCallback += DrawListItems;
-        reorderableList.drawHeaderCallback += DrawHeader;
-        reorderableList.onSelectCallback += OnItemSelected;
-        reorderableList.onRemoveCallback += OnItemRemoved;
-
-        RefreshEditors();
+        CreateReorderableList();
     }
 
-    private void RefreshEditors()
+    private void CreateReorderableList()
     {
-        targetEditor = null;
+        settingsReorderableList = new ReorderableList(serializedObject, settingsArrayProperty, true, false, false, true);
+        settingsReorderableList.drawHeaderCallback += DrawHeader;
+        settingsReorderableList.drawElementCallback += DrawListItems;
+        settingsReorderableList.onSelectCallback += OnItemSelected;
+        settingsReorderableList.onRemoveCallback += OnItemRemoved;
+    }
 
-        if (selection == -1)
+    private void DrawHeader(Rect rect)
+    {
+        EditorGUI.LabelField(rect, displayNameProperty.stringValue);
+    }
+
+    private void DrawListItems(Rect rect, int index, bool isActive, bool isFocused)
+    {
+        string text = targetSettingsGroup.Settings[index].DisplayName + " (" + 
+            targetSettingsGroup.Settings[index].GetType() + ")";
+        EditorGUI.LabelField(new Rect(rect.x, rect.y, 300, EditorGUIUtility.singleLineHeight), text);
+    }
+
+    private void OnItemSelected(ReorderableList list)
+    {
+        BaseSetting selectedSetting = targetSettingsGroup.Settings[list.index];   
+        SettingSelected?.Invoke(selectedSetting);
+    }
+
+    private void OnItemRemoved(ReorderableList list)
+    {
+        if (!EditorUtility.DisplayDialog("Are you sure?", "Delete " +
+            targetSettingsGroup.Settings[list.index].DisplayName + "?", "Delete", "Cancel"))
             return;
 
-        UnityEngine.Object selectedObject = settingsProperty.GetArrayElementAtIndex(selection).objectReferenceValue;
-        targetEditor = CreateEditor(selectedObject);
+        UnityEngine.Object targetObject = settingsArrayProperty.GetArrayElementAtIndex(list.index).objectReferenceValue;
+
+        settingsArrayProperty.arraySize--;
+        serializedObject.ApplyModifiedProperties();
+
+        string path = AssetDatabase.GetAssetPath(targetObject);
+        AssetDatabase.DeleteAsset(path);
+
+        AssetDatabase.Refresh();
+
+        CreateReorderableList();
+
+        SettingSelected?.Invoke(null);
+    }
+
+    private Type[] GetInheritedClasses(Type targetType)
+    {
+        return Assembly.GetAssembly(targetType).GetTypes().
+            Where(TheType => TheType.IsClass && !TheType.IsAbstract && TheType.IsSubclassOf(targetType)).ToArray();
     }
 
 }

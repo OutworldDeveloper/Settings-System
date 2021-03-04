@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2295995378950334816}
   - component: {fileID: 2295995378950334817}
   m_Layer: 5
-  m_Name: SettingsGroupButtonUI
+  m_Name: Prefab_SettingsGroupPresenter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56,7 +56,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2295995378950334820}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68a5ad10922a15840b74dca495668ee8, type: 3}
+  m_Script: {fileID: 11500000, guid: e9d9719763896694a8b776700d92627d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 7897287493218653210}
