@@ -3,13 +3,11 @@
 public abstract class BaseSetting : ScriptableObject
 {
 
-    [SerializeField] private string displayName;
+    [SerializeField] private string _displayName;
 
-    public string DisplayName => displayName;
+    public string DisplayName => _displayName;
 
-    protected void SettingsChanged()
-    {
-        Settings.SettingsChanged();
-    }
+    public virtual void Reset() { }
+    public virtual void OnGameStarted() { }
 
 }

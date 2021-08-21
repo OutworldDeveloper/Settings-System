@@ -6,11 +6,13 @@ using UnityEngine;
 public class Setting_Float : Setting<float>
 {
 
-    [SerializeField] private float minValue;
-    [SerializeField] private float maxValue;
+    [SerializeField] private float _minValue;
+    [SerializeField] private float _maxValue;
+    [SerializeField] private FloatPresentation _presentation;
 
-    public virtual float MinValue => minValue;
-    public virtual float MaxValue => maxValue;
+    public virtual float MinValue => _minValue;
+    public virtual float MaxValue => _maxValue;
+    public FloatPresentation Presentation => _presentation;
 
     protected override float LoadValue()
     {
@@ -22,4 +24,12 @@ public class Setting_Float : Setting<float>
         PlayerPrefs.SetFloat(name, value);
     }
 
+}
+
+public enum FloatPresentation
+{
+    Percentage,
+    ValueRounded,
+    Value,
+    NormalizedValue,
 }

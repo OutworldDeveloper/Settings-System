@@ -3,46 +3,47 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class SettingsUI : MonoBehaviour
 {
 
-    [SerializeField] private SettingsGroupPresenter settingGroupPresenterPrefab;
-    [SerializeField] private BaseSettingPresenter[] presentersPrefabs;
-    [SerializeField] private Transform presentersParent;
+    [SerializeField] private SettingsGroupPresenter _groupPresenterPrefab;
+    [SerializeField] private BaseSettingPresenter[] _presentersPrefabs;
+    [SerializeField] private Transform _parent;
 
     private void Start()
     {
-        Setup();
+        foreach (var group in Settings.Groups)
+        {
+            Instantiate(_groupPresenterPrefab, _parent).Setup(group);
+            foreach (var setting in group.Settings)
+            {
+                var presenterPrefab = FindPresenterPrefabFor(setting);
+                Instantiate(presenterPrefab, _parent).Setup(setting);
+            }       
+        }
     }
 
-    private void Setup()
+    private BaseSettingPresenter FindPresenterPrefabFor(BaseSetting setting)
     {
-        foreach (var group in Settings.GetGroups())
+        foreach (var presenterPrefab in _presentersPrefabs)
         {
-            Instantiate(settingGroupPresenterPrefab, presentersParent).Setup(group);
-            foreach (var parameter in group.Settings)
+            if (presenterPrefab.TargetType == setting.GetType())
             {
-                bool found = false;
-                foreach (var presenterPrefab in presentersPrefabs)
-                {
-                    if (presenterPrefab.TargetType != parameter.GetType()) 
-                        continue;
-                    Instantiate(presenterPrefab, presentersParent).Setup(parameter);
-                    found = true;
-                    break;
-                }
-                if (found)
-                    continue;
-                foreach (var presenterPrefab in presentersPrefabs)
-                {
-                    if(!parameter.GetType().IsSubclassOf(presenterPrefab.TargetType)) 
-                        continue;
-                    Instantiate(presenterPrefab, presentersParent).Setup(parameter);
-                    break;
-                }
-            }      
+                return presenterPrefab;
+            }
         }
+
+        foreach (var presenterPrefab in _presentersPrefabs)
+        {
+            if (setting.GetType().IsSubclassOf(presenterPrefab.TargetType))
+            {
+                return presenterPrefab;
+            }
+        }
+
+        return null;
     }
 
 }

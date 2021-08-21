@@ -3,48 +3,46 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Setting<T> : BaseSetting, ISettingsResetable
+public abstract class Setting<T> : BaseSetting
 {
 
-    [SerializeField] private T defaultValue;
+    [SerializeField] private T _defaultValue;
+    
+    protected virtual T DefaultValue => _defaultValue;
 
-    private T cashedValue;
-    private bool isCashed;
-
-    protected virtual T getDefaultValue => defaultValue;
+    private T _cashedValue;
+    private bool _isCashed;
 
     public void SetValue(T value)
     {
-        isCashed = false;
+        _isCashed = false;
         SaveValue(value);
         OnValueChanged();
-        SettingsChanged();
+        Settings.SettingsChanged();
     }
 
     public T GetValue()
     {
-        if (isCashed)
-            return cashedValue;
+        if (_isCashed)
+            return _cashedValue;
 
         if (PlayerPrefs.HasKey(name))
         {
-            cashedValue = LoadValue();
-            isCashed = true;
-            return cashedValue;
+            _cashedValue = LoadValue();
+            _isCashed = true;
+            return _cashedValue;
         }
 
-        return getDefaultValue;
+        return DefaultValue;
     }
 
-    public void ResetSetting()
+    public override void Reset()
     {
-        SetValue(getDefaultValue);
+        SetValue(DefaultValue);
     }
 
     protected abstract T LoadValue();
-
     protected abstract void SaveValue(T value);
-
     protected virtual void OnValueChanged() { }
 
 }

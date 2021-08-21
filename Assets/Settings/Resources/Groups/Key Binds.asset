@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57a6406afa1207a4aa8fd9ccb458208d, type: 3}
   m_Name: Key Binds
   m_EditorClassIdentifier: 
-  displayName: Key Binds
-  settings:
+  _displayName: Name
+  _settings:
   - {fileID: 11400000, guid: 6a025a2394e03784dba64cfa60e6a09d, type: 2}
   - {fileID: 11400000, guid: 71646b487424e924286330a22a59dda7, type: 2}
-  priority: 3
+  _priority: 0

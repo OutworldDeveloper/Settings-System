@@ -5,9 +5,10 @@ using UnityEditor;
 using UnityEngine.Audio;
 using System;
 
-[CustomEditor(typeof(Setting_Volume))]
+//[CustomEditor(typeof(Setting_Volume))]
 public class SettingsVolumeEditor : Editor
 {
+
     private SerializedProperty targetDisplayNameProperty;
     private SerializedProperty targetMixerProperty;
     private SerializedProperty targetParameter;
@@ -54,9 +55,9 @@ public class SettingsVolumeEditor : Editor
 
     private void OnEnable()
     {
-        targetDisplayNameProperty = serializedObject.FindProperty("displayName");
-        targetMixerProperty = serializedObject.FindProperty("targetMixer");
-        targetParameter = serializedObject.FindProperty("targetParameter");
+        targetDisplayNameProperty = serializedObject.FindProperty("_displayName");
+        targetMixerProperty = serializedObject.FindProperty("_targetMixer");
+        targetParameter = serializedObject.FindProperty("_targetParameter");
         Refresh();
     }
 
@@ -72,7 +73,7 @@ public class SettingsVolumeEditor : Editor
             return;
 
         Array parameters = (Array)targetAudioMixer.GetType().
-            GetProperty("exposedParameters").GetValue(targetAudioMixer, null);
+            GetProperty("_targetParameter").GetValue(targetAudioMixer, null);
 
         exposedParameters.Clear();
         exposedParameters.Add("Not selected");
@@ -80,10 +81,10 @@ public class SettingsVolumeEditor : Editor
         for (int i = 0; i < parameters.Length; i++)
         {
             var o = parameters.GetValue(i);
-            string Param = (string)o.GetType().GetField("name").GetValue(o);
+            string Param = (string)o.GetType().GetField("_name").GetValue(o);
             exposedParameters.Add(Param);
 
-            if (Param == serializedObject.FindProperty("targetParameter").stringValue)
+            if (Param == serializedObject.FindProperty("_targetParameter").stringValue)
                 selectedParameter = i + 1;
         }
     }

@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e408e00c70c851a449884ee08bc3eb9a, type: 3}
   m_Name: move_forward
   m_EditorClassIdentifier: 
-  displayName: Move Forward
-  defaultValue: 119
+  _displayName: Move Forward
+  _defaultValue: 119

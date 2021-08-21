@@ -4,24 +4,29 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Settings : MonoBehaviour
+public sealed class Settings : MonoBehaviour
 {
 
     private const string GroupsPath = "Groups";
+    private const string ManagerName = "Settings Manager";
 
     public static event Action OnSettingsChanged;
+    public static SettingsGroup[] Groups { get; private set; } 
 
-    private static Settings instance;
-    private static bool gameStartedCallbackSended;
+    private static Settings _instance;
+    private static bool _gameStartedCallbackSended;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void OnBeforeSceneLoadRuntimeMethod()
     {
-        if (instance)
+        if (_instance)
             return;
-        instance = new GameObject().AddComponent<Settings>();
-        instance.gameObject.name = "Settings Manager";
-        DontDestroyOnLoad(instance);
+
+        Groups = LoadAndSortSettingsGroups();
+
+        _instance = new GameObject().AddComponent<Settings>();
+        _instance.gameObject.name = ManagerName;
+        DontDestroyOnLoad(_instance);
     }
 
     public static void SettingsChanged()
@@ -31,36 +36,40 @@ public class Settings : MonoBehaviour
 
     public static void ResetSettings()
     {
-        foreach (var group in GetGroups())
-            foreach (var parameter in group.Settings)
-                (parameter as ISettingsResetable)?.ResetSetting();
+        foreach (var group in Groups)
+        {
+            group.Settings.ForEach(setting => setting.Reset());
+        }
     }
 
-    public static SettingsGroup[] GetGroups()
+    private static SettingsGroup[] LoadAndSortSettingsGroups()
     {
         SettingsGroup[] groups = Resources.LoadAll<SettingsGroup>(GroupsPath);
-        return groups.OrderBy(o => o.Priority).ToArray();
+        return groups.OrderBy(group => group.Priority).ToArray();
     }
 
     private void Awake()
     {
-        if (instance)
+        if (_instance)
             Destroy(gameObject);
         else
         {
-            instance = this;
-            DontDestroyOnLoad(instance);
+            _instance = this;
+            DontDestroyOnLoad(_instance);
         }
     }
 
     private void Start()
     {
-        if (gameStartedCallbackSended)
+        if (_gameStartedCallbackSended)
             return;
-        foreach (var group in GetGroups())
-            foreach (var parameter in group.Settings)
-                (parameter as ISettingsGameStartedCallbackReciver)?.OnGameStarted();
-        gameStartedCallbackSended = true;
+
+        foreach (var group in Groups)
+        {
+            group.Settings.ForEach(setting => setting.OnGameStarted());
+        }
+
+        _gameStartedCallbackSended = true;
     }
 
 }

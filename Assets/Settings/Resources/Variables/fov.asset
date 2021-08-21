@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e596ce6e33c9554ca1d17c936fd21a2, type: 3}
   m_Name: fov
   m_EditorClassIdentifier: 
-  displayName: Field Of View
-  defaultValue: 90
-  minValue: 60
-  maxValue: 103
+  _displayName: Field Of View
+  _defaultValue: 60
+  _minValue: 60
+  _maxValue: 90
+  _presentation: 1

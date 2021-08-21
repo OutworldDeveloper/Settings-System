@@ -6,9 +6,9 @@ using UnityEngine;
 public class Setting_Options : Setting<int>
 {
 
-    [SerializeField] private Options options;
+    [SerializeField] private Options _options;
 
-    public Options Options => options;
+    public Options Options => _options;
 
     protected override int LoadValue()
     {

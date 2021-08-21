@@ -4,30 +4,29 @@ using UnityEngine;
 using UnityEngine.Audio;
 
 [CreateAssetMenu(fileName = "New Volume Setting", menuName = "Settings/Settings/Volume")]
-public class Setting_Volume : Setting_Float, ISettingsGameStartedCallbackReciver
+public class Setting_Volume : Setting_Float
 {
 
-    [SerializeField] private AudioMixer targetMixer;
-    [SerializeField] private string targetParameter;
+    [SerializeField] private AudioMixer _targetMixer;
+    [SerializeField] private string _targetParameter;
 
     public override float MinValue => 0.001f;
     public override float MaxValue => 1f;
+    protected override float DefaultValue => 1f;
 
-    protected override float getDefaultValue => 1f;
-
-    public void OnGameStarted()
+    public override void OnGameStarted()
     {
-        SetParameter();
+        ApplyParameter();
     }
 
     protected override void OnValueChanged()
     {
-        SetParameter();
+        ApplyParameter();
     }
 
-    private void SetParameter()
+    private void ApplyParameter()
     {
-        targetMixer.SetFloat(targetParameter, Mathf.Log10(GetValue()) * 20);
+        _targetMixer.SetFloat(_targetParameter, Mathf.Log10(GetValue()) * 20);
     }
 
 }
