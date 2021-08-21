@@ -7,11 +7,10 @@ using UnityEngine;
 public sealed class SettingsManager : MonoBehaviour
 {
 
-    private const string ContainerPath = "SettingsContainer";
-    private const string ManagerName = "Settings Manager";
+    public const string ManagerName = "Settings Manager";
 
     public static event Action OnSettingsChanged;
-    public static SettingsContainer Container { get; private set; }
+    public static List<SettingsGroup> Groups => _instance._settingsGroups;
 
     private static SettingsManager _instance;
     private static bool _gameStartedCallbackSended;
@@ -22,10 +21,8 @@ public sealed class SettingsManager : MonoBehaviour
         if (_instance)
             return;
 
-        Container = Resources.Load<SettingsContainer>(ContainerPath);
-
-        _instance = new GameObject().AddComponent<SettingsManager>();
-        _instance.gameObject.name = ManagerName;
+        var prefab = Resources.Load<SettingsManager>(ManagerName);
+        _instance = Instantiate(prefab);
         DontDestroyOnLoad(_instance);
     }
 
@@ -41,11 +38,13 @@ public sealed class SettingsManager : MonoBehaviour
 
     public static void ForEachSetting(Action<BaseSetting> action)
     {
-        Container.Groups.ForEach(group =>
+        Groups.ForEach(group =>
         {
             group.Settings.ForEach(setting => action.Invoke(setting));
         });
     }
+
+    [SerializeField] private List<SettingsGroup> _settingsGroups = new List<SettingsGroup>();
 
     private void Awake()
     {
@@ -60,6 +59,8 @@ public sealed class SettingsManager : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log("Settings Manager started");
+
         if (_gameStartedCallbackSended)
             return;
 

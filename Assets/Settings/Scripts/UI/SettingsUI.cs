@@ -14,7 +14,7 @@ public class SettingsUI : MonoBehaviour
 
     private void Start()
     {
-        foreach (var group in SettingsManager.Container.Groups)
+        foreach (var group in SettingsManager.Groups)
         {
             Instantiate(_groupPresenterPrefab, _parent).Setup(group);
             foreach (var setting in group.Settings)
