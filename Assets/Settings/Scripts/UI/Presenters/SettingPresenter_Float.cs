@@ -37,7 +37,6 @@ public class SettingPresenter_Float : SettingPresenter<Setting_Float>
 
     public void OnValueChanged(float value)
     {
-        Debug.Log("иноплонетянин");
         Setting.SetValue(value);
         UpdateName();
     }

@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public sealed class Settings : MonoBehaviour
+public sealed class SettingsManager : MonoBehaviour
 {
 
-    private const string GroupsPath = "Groups";
+    private const string ContainerPath = "SettingsContainer";
     private const string ManagerName = "Settings Manager";
 
     public static event Action OnSettingsChanged;
-    public static SettingsGroup[] Groups { get; private set; } 
+    public static SettingsContainer Container { get; private set; }
 
-    private static Settings _instance;
+    private static SettingsManager _instance;
     private static bool _gameStartedCallbackSended;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -22,9 +22,9 @@ public sealed class Settings : MonoBehaviour
         if (_instance)
             return;
 
-        Groups = LoadAndSortSettingsGroups();
+        Container = Resources.Load<SettingsContainer>(ContainerPath);
 
-        _instance = new GameObject().AddComponent<Settings>();
+        _instance = new GameObject().AddComponent<SettingsManager>();
         _instance.gameObject.name = ManagerName;
         DontDestroyOnLoad(_instance);
     }
@@ -36,16 +36,15 @@ public sealed class Settings : MonoBehaviour
 
     public static void ResetSettings()
     {
-        foreach (var group in Groups)
-        {
-            group.Settings.ForEach(setting => setting.Reset());
-        }
+        ForEachSetting(setting => setting.Reset());
     }
 
-    private static SettingsGroup[] LoadAndSortSettingsGroups()
+    public static void ForEachSetting(Action<BaseSetting> action)
     {
-        SettingsGroup[] groups = Resources.LoadAll<SettingsGroup>(GroupsPath);
-        return groups.OrderBy(group => group.Priority).ToArray();
+        Container.Groups.ForEach(group =>
+        {
+            group.Settings.ForEach(setting => action.Invoke(setting));
+        });
     }
 
     private void Awake()
@@ -64,10 +63,7 @@ public sealed class Settings : MonoBehaviour
         if (_gameStartedCallbackSended)
             return;
 
-        foreach (var group in Groups)
-        {
-            group.Settings.ForEach(setting => setting.OnGameStarted());
-        }
+        ForEachSetting(setting => setting.OnGameStarted());
 
         _gameStartedCallbackSended = true;
     }

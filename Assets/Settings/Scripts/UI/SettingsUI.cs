@@ -14,14 +14,14 @@ public class SettingsUI : MonoBehaviour
 
     private void Start()
     {
-        foreach (var group in Settings.Groups)
+        foreach (var group in SettingsManager.Container.Groups)
         {
             Instantiate(_groupPresenterPrefab, _parent).Setup(group);
             foreach (var setting in group.Settings)
             {
                 var presenterPrefab = FindPresenterPrefabFor(setting);
                 Instantiate(presenterPrefab, _parent).Setup(setting);
-            }       
+            }
         }
     }
 

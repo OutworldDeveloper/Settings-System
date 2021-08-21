@@ -34,12 +34,12 @@ public abstract class SettingPresenter<T> : BaseSettingPresenter where T : BaseS
 
     protected virtual void OnSetup()
     {
-        Settings.OnSettingsChanged += OnSettingsChanged;
+        SettingsManager.OnSettingsChanged += OnSettingsChanged;
     }
 
     protected virtual void OnDestroy()
     {
-        Settings.OnSettingsChanged -= OnSettingsChanged;
+        SettingsManager.OnSettingsChanged -= OnSettingsChanged;
     }
 
     private void OnSettingsChanged()

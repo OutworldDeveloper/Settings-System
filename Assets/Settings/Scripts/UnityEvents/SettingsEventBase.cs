@@ -8,12 +8,12 @@ public abstract class SettingsEventBase : MonoBehaviour
 
     private void OnEnable()
     {
-        Settings.OnSettingsChanged += SettingsUpdated;
+        SettingsManager.OnSettingsChanged += SettingsUpdated;
     }
 
     private void OnDisable()
     {
-        Settings.OnSettingsChanged -= SettingsUpdated;
+        SettingsManager.OnSettingsChanged -= SettingsUpdated;
     }
 
     private void Awake()

@@ -18,7 +18,7 @@ public abstract class Setting<T> : BaseSetting
         _isCashed = false;
         SaveValue(value);
         OnValueChanged();
-        Settings.SettingsChanged();
+        SettingsManager.SettingsChanged();
     }
 
     public T GetValue()

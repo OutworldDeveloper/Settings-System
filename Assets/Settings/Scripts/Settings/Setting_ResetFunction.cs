@@ -8,7 +8,7 @@ public class Setting_ResetFunction : Setting_Function
 
     public override void Execute()
     {
-        Settings.ResetSettings();
+        SettingsManager.ResetSettings();
     }
 
 }
