@@ -30,16 +30,6 @@ public class SettingPresenter_KeyCode : SettingPresenter<Setting_KeyCode>
         _inputButton.onClick.RemoveListener(StartListeningForInput);
     }
 
-    private void OnEnable()
-    {
-        _inputButton.onClick.AddListener(StartListeningForInput);
-    }
-
-    private void OnDisable()
-    {
-        _inputButton.onClick.RemoveListener(StartListeningForInput);
-    }
-
     private void Update()
     {
         if (!_isListening) 

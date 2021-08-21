@@ -16,5 +16,6 @@ MonoBehaviour:
   _defaultValue: 100
   _minValue: 0
   _maxValue: 100
+  _presentation: 0
   _targetMixer: {fileID: 24100000, guid: 5f89105d226805f489bb881be08844f3, type: 2}
   _targetParameter: MusicVolume
